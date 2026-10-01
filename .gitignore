@@ -1,0 +1,16 @@
+# 函式庫安裝資料夾（可用 npm install 重新取得）
+node_modules/
+
+# 防止誤傳案件資料：根目錄下的清冊、書狀、進度檔一律不納入
+/*.docx
+/*.doc
+/*.pdf
+證據調查進度*.json
+聲請調查證據_*.docx
+證據清冊對照表_*.docx
+法院裁定對照表_*.docx
+
+# 系統暫存檔
+.DS_Store
+Thumbs.db
+~$*

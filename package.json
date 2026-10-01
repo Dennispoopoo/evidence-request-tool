@@ -1,0 +1,13 @@
+{
+  "name": "evidence-request-tool",
+  "version": "1.0.0",
+  "private": true,
+  "description": "聲請調查證據表格產生器：由證據清冊產生國民法官案件準備程序書之聲請調查證據表格（離線單一 HTML）",
+  "scripts": {
+    "build": "python build.py"
+  },
+  "dependencies": {
+    "jszip": "3.10.1",
+    "pdfjs-dist": "3.11.174"
+  }
+}

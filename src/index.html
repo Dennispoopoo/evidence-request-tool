@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>聲請調查證據表格產生器</title>
+<style>/*@@CSS@@*/</style>
+</head>
+<body>
+<header class="top">
+  <h1>聲請調查證據表格產生器</h1>
+  <span class="src" id="srcName"></span>
+  <span class="sp"></span>
+  <button class="tbtn" id="btnImport">匯入證據清冊</button>
+  <button class="tbtn" id="btnSave">儲存進度</button>
+  <button class="tbtn" id="btnLoad">載入進度</button>
+  <button class="tbtn" id="btnClear">清空</button>
+  <input type="file" id="fileList" accept=".docx,.pdf" multiple hidden>
+  <input type="file" id="fileProg" accept=".json" hidden>
+</header>
+<div class="banner" id="restoreBanner">
+  <span id="restoreText"></span>
+  <button id="btnRestore">恢復</button>
+  <button id="btnDiscard">捨棄</button>
+</div>
+
+<main class="main" id="main">
+  <section class="pane" id="listPane" aria-label="證據清單">
+    <div class="pane-head" id="listHead" hidden>
+      <div class="tabs" id="tabs" role="group" aria-label="篩選"></div>
+      <div class="tools">
+        <label><input type="checkbox" id="selAll"> 全選目前顯示</label>
+        <span class="note">逐項點選，或勾選多項後批次設定</span>
+        <input class="search" id="search" type="search" placeholder="搜尋證據名稱" aria-label="搜尋證據名稱">
+      </div>
+      <div class="bulk" id="bulk">
+        <span class="lbl" id="bulkCount"></span>
+        <button data-bulk="apply1">聲請</button>
+        <button data-bulk="apply0">不聲請</button>
+        <button data-bulk="crime">犯罪事實</button>
+        <button data-bulk="sentence">科刑資料</button>
+        <select id="bulkMethod" aria-label="批次設定調查方法">
+          <option value="">調查方法…</option>
+          <option value="record">筆錄</option>
+          <option value="doc">文書</option>
+          <option value="media">錄音錄影</option>
+          <option value="exhibit">證物</option>
+          <option value="witness">證人</option>
+        </select>
+        <button data-bulk="del">刪除</button>
+        <button data-bulk="none">取消勾選</button>
+      </div>
+    </div>
+    <div class="pane-body" id="listBody"></div>
+  </section>
+
+  <section class="pane" aria-label="輸出">
+    <div class="rtabs">
+      <div class="rtab-btns" role="tablist" aria-label="輸出內容">
+        <button type="button" role="tab" data-tab="apply" aria-selected="true">聲請表格</button>
+        <button type="button" role="tab" data-tab="cmp" aria-selected="false">清冊對照</button>
+        <button type="button" role="tab" data-tab="rul" aria-selected="false">法院裁定</button>
+      </div>
+      <div class="gset">
+        <label>字級
+          <select id="fontPt" aria-label="輸出字級">
+            <option value="12">12</option><option value="13">13</option><option value="14" selected>14</option><option value="16">16</option>
+          </select>
+        </label>
+        <label title="預設 16 公分＝Word 版心寬度。貼到漢書時若表格與標題不等長，可調整此值">表格寬度
+          <input type="number" id="tableCm" min="8" max="20" step="0.1" value="16.0" aria-label="表格寬度（公分）"> 公分
+        </label>
+      </div>
+    </div>
+
+    <div class="pane-head pv-head" data-panel="apply">
+      <div class="opts">
+        <span>詢問被告：</span>
+        <label><input type="checkbox" id="askCrime" checked> 犯罪事實部分</label>
+        <label><input type="checkbox" id="askSent" checked> 科刑資料部分</label>
+      </div>
+      <div class="acts">
+        <button id="btnCopy">複製表格</button>
+        <button id="btnDocx" class="primary">下載 Word</button>
+      </div>
+      <div class="lockarea" id="lockArea"></div>
+    </div>
+    <div class="warns" id="warns" data-panel="apply"></div>
+    <div class="pane-body paperwrap" data-panel="apply"><div class="paper" id="paper"></div></div>
+
+    <div class="pane-head pv-head" data-panel="cmp" hidden>
+      <div class="tabs" id="cmpTabs" role="group" aria-label="依是否聲請分類"></div>
+      <div class="acts">
+        <button id="btnCmpCopy">複製表格</button>
+        <button id="btnCmpDocx" class="primary">下載 Word</button>
+      </div>
+    </div>
+    <div class="pane-body paperwrap" data-panel="cmp" hidden><div class="paper wide" id="cmpPaper"></div></div>
+
+    <div class="pane-head pv-head" data-panel="rul" hidden>
+      <div class="tabs" id="rulTabs" role="group" aria-label="依法院裁定分類"></div>
+      <div class="acts">
+        <button id="btnRulCopy">複製表格</button>
+        <button id="btnRulDocx" class="primary">下載 Word</button>
+      </div>
+      <div class="rultools">
+        <button type="button" class="lbtn" id="btnRulFill">將「未填」全部設為准許</button>
+        <div class="bulk" id="rulBulk">
+          <span class="lbl" id="rulBulkCount"></span>
+          <button data-rb="grant">准許</button>
+          <button data-rb="sentonly">僅准作科刑資料</button>
+          <button data-rb="reserve">保留</button>
+          <button data-rb="deny">駁回</button>
+          <button data-rb="clear">清除裁定</button>
+          <button data-rb="none">取消勾選</button>
+        </div>
+      </div>
+    </div>
+    <div class="pane-body" data-panel="rul" hidden id="rulBody"></div>
+  </section>
+</main>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="box">
+    <h3 id="modalTitle"></h3>
+    <p id="modalText"></p>
+    <div class="acts" id="modalActs"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"><span id="toastText"></span><button id="toastBtn" hidden>復原</button></div>
+<div class="busy" id="busy">讀取中…</div>
+<div id="clip" aria-hidden="true"></div>
+
+<script>/*@@JSZIP@@*/</script>
+<script>/*@@PDFJS@@*/</script>
+<script>/*@@PDFWORKER@@*/</script>
+<script>/*@@APP@@*/</script>
+</body>
+</html>
